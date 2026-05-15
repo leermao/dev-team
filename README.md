@@ -71,18 +71,19 @@ Describe your feature or task. The **Project Lead** (you) splits the work and de
 
 ```
 team-agents/
-├── plugin.json                  # Plugin manifest
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest
 └── skills/
-    ├── dev-team.md              # /dev-team startup skill (user-invocable)
-    ├── project-lead.md
-    ├── fe-team-leader.md
-    ├── fe-developer.md
-    ├── be-team-leader.md
-    ├── be-developer.md
-    ├── test-team-leader.md
-    ├── test-engineer-auto.md
-    ├── test-engineer-manual.md
-    └── security-engineer.md
+    ├── dev-team/SKILL.md        # /team-agents:dev-team startup skill
+    ├── project-lead/SKILL.md
+    ├── fe-team-leader/SKILL.md
+    ├── fe-developer/SKILL.md
+    ├── be-team-leader/SKILL.md
+    ├── be-developer/SKILL.md
+    ├── test-team-leader/SKILL.md
+    ├── test-engineer-auto/SKILL.md
+    ├── test-engineer-manual/SKILL.md
+    └── security-engineer/SKILL.md
 ```
 
 ## License
