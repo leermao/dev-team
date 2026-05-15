@@ -87,4 +87,5 @@ Contact `fe-developer` directly only when FE behavior is undocumented and `be-te
 
 ## Communication Rules
 
+- Receive from: `be-team-leader` (task assignments, review feedback), `fe-developer` (cross-team clarifications when necessary)
 - All via SendMessage. Plain text is invisible to teammates.

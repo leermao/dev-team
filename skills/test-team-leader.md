@@ -26,6 +26,8 @@ Break into sub-tasks covering all four scenarios:
 | Manual edge cases + UX | `test-manual` |
 | Security input fuzzing (manual) | `test-manual` |
 
+Apply all four scenarios for full-stack features. For BE-only changes, omit the E2E automated browser flow row. For FE-only changes, omit the security input fuzzing row if no new API endpoints are present.
+
 TaskCreate each sub-task with correct owner. SendMessage to `test-auto` and `test-manual` in parallel.
 
 ### 3. Bug Routing
@@ -41,6 +43,10 @@ On bug report from `test-auto` or `test-manual`:
 Never contact `fe-developer` or `be-developer` directly.
 
 ### 4. Report to Project Lead
+
+When ALL of the following are true, send the report:
+- All sub-tasks are `completed`
+- All bugs are either `[已修复]` (re-test passed) or formally accepted as known issues by project-lead
 
 SendMessage to `project-lead`:
 

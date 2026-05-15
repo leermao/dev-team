@@ -55,7 +55,7 @@ On `CHANGES REQUIRED`: SendMessage to `fe-developer`, return to step 4 after fix
 
 On tentative `APPROVED`: SendMessage to `security-engineer` with code and audit request. Wait for response.
 
-Critical/High findings → `CHANGES REQUIRED` to `fe-developer`. Return to step 4.
+Critical/High findings → `CHANGES REQUIRED` to `fe-developer`. Return to step 4 after fix. When developer re-submits, re-invoke `security-engineer` again before any new APPROVED verdict. Repeat until no Critical/High findings remain.
 
 No Critical/High → proceed to report.
 
@@ -74,8 +74,18 @@ SendMessage to `project-lead`:
 **遗留问题：** <none or list>
 ```
 
+### 7. Handle Bug Report from test-team-leader
+
+On receiving a bug report via SendMessage from `test-team-leader`:
+
+1. Read the defect report carefully to determine which sub-task or file is affected
+2. TaskCreate a bug fix task with `owner: fe-developer` and the defect details
+3. SendMessage to `fe-developer` with the defect report and fix instructions
+4. When `fe-developer` reports fix completion: perform Code Review on the fix
+5. On APPROVED fix: SendMessage to `test-team-leader` confirming fix is complete and ready for re-test
+
 ## Communication Rules
 
-- Receive from: `project-lead`, `fe-developer`, `security-engineer`
+- Receive from: `project-lead`, `fe-developer`, `security-engineer`, `test-team-leader`
 - Send to: `project-lead`, `fe-developer`, `security-engineer`
 - All via SendMessage. Plain text is invisible to teammates.

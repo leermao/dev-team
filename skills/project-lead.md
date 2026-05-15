@@ -29,7 +29,10 @@ Wait for user confirmation.
 
 ### 2. Scale Judgment
 
-- Changes fewer than 3 files → assign directly to single engineer, skip Team Leaders
+- Changes fewer than 3 files → assign directly to the most relevant engineer, skip Team Leaders:
+  - Pure FE change (UI, component, styles) → assign to `fe-developer` with `owner: fe-developer`
+  - Pure BE change (API, service, DB) → assign to `be-developer` with `owner: be-developer`
+  - Engineer reports completion directly to Project Lead using the same delivery report format (Step 5)
 - Changes 3+ files, or spans multiple teams → split into team tasks
 
 ### 3. Task Creation and Dispatch

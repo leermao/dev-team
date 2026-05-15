@@ -80,4 +80,5 @@ Contact `be-developer` directly only when an API's behavior is undocumented and 
 
 ## Communication Rules
 
+- Receive from: `fe-team-leader` (task assignments, review feedback), `be-developer` (cross-team clarifications when necessary)
 - All via SendMessage. Plain text is invisible to teammates.
