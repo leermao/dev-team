@@ -72,7 +72,10 @@ Scope: only `dev-team`. Never touch other teams, panes, code, or user files.
 1. SendMessage to each of the 8 canonical names with `type: shutdown_request`, content: `清理 stale dev-team，准备重新启动。` Ignore send failures.
 2. Call TeamDelete for `dev-team`.
 3. If TeamDelete succeeds → proceed to Step 4.
-4. If TeamDelete fails and stale panes are confirmed absent → tell user: "将只清理 dev-team 的 stale state，不影响其他团队、pane、代码或用户文件。" Then delete only:
+4. If TeamDelete fails and stale panes are still present:
+   Tell user: "团队清理失败。请手动关闭以下 tmux pane 后重试 /dev-team：[列出仍存在的旧 paneId]。"
+   Stop.
+5. If TeamDelete fails and stale panes are confirmed absent → tell user: "将只清理 dev-team 的 stale state，不影响其他团队、pane、代码或用户文件。" Then delete only:
    - `~/.claude/teams/dev-team/`
    - `~/.claude/tasks/dev-team/`
 
@@ -173,7 +176,7 @@ Rules:
 - Write OpenAPI/JSDoc API documentation alongside code.
 - Report to be-team-leader via SendMessage: Changed files / API docs updated / Self-test results / Outstanding issues.
 - Unclear requirements → SendMessage to be-team-leader. Never self-assume.
-- Contact fe-developer directly only when necessary and be-team-leader cannot resolve it.
+- Contact fe-developer directly only when FE behavior is undocumented and be-team-leader cannot resolve it.
 - Plain text is invisible to teammates. Use SendMessage for all communication.
 ```
 
@@ -250,13 +253,14 @@ Rules:
 - Report format per finding: Risk level (Critical/High/Medium/Low) | Location (file:line) | Fix recommendation.
 - Report findings via SendMessage back to the Team Leader who invoked you.
 - Conclusion is BLOCKED if any Critical/High finding exists; PASSED otherwise.
+- If the provided code is insufficient for a meaningful audit, SendMessage to the invoking team leader requesting the full file list before auditing.
 - Never initiate contact. Never respond to anyone except fe-team-leader or be-team-leader.
 - Plain text is invisible to teammates. Use SendMessage for all communication.
 ```
 
 ### Step 6: Ready Signal
 
-Wait for all 8 teammates to send an idle/ready message. Then output:
+Wait up to 30 seconds for all 8 teammates to send an idle/ready message. Any agent that has not responded within 30 seconds → mark its table row as `error`. Output the table regardless, and tell the user which agents failed to initialize. Then output:
 
 ```
 dev-team 已就绪（9人团队）
@@ -274,6 +278,8 @@ dev-team 已就绪（9人团队）
 | Security Engineer | <paneId> | ready |
 
 现在可以描述开发任务，我作为 Project Lead 负责拆分和分配。
+
+(Substitute actual tmux pane IDs returned from the Step 5 Agent tool call results.)
 ```
 
 ## Verification Checklist
