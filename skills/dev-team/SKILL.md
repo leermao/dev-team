@@ -260,7 +260,23 @@ Rules:
 
 ### Step 6: Ready Signal
 
-Wait up to 30 seconds for all 8 teammates to send an idle/ready message. Any agent that has not responded within 30 seconds → mark its table row as `error`. Output the table regardless, and tell the user which agents failed to initialize. Then output:
+The `TeammateIdle` hook writes each teammate's ready state to
+`~/.claude/teams/dev-team/ready.json` as teammates finish initializing.
+Poll this file instead of waiting a fixed 30 seconds:
+
+```bash
+READY_FILE="$HOME/.claude/teams/dev-team/ready.json"
+for i in $(seq 1 15); do
+  READY=$(jq '.ready_count // 0' "$READY_FILE" 2>/dev/null || echo 0)
+  [ "$READY" -ge 8 ] && break
+  sleep 2
+done
+READY=$(jq '.ready_count // 0' "$READY_FILE" 2>/dev/null || echo 0)
+READY_LIST=$(jq -r '.ready // [] | .[]' "$READY_FILE" 2>/dev/null || echo "")
+```
+
+Build the status table: any of the 8 canonical names absent from `$READY_LIST`
+after the loop → mark as `error`. Then output:
 
 ```
 dev-team 已就绪（9人团队）
