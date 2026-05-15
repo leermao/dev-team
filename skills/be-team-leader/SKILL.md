@@ -37,19 +37,21 @@ TaskCreate each sub-task with `owner: be-developer`. TaskUpdate to `in_progress`
 
 ### 4. Code Review
 
-On be-developer completion report:
+On be-developer completion report, delegate to the `code-reviewer` subagent:
 
-Checklist:
-- [ ] Logical correctness and business rule compliance
-- [ ] Readability and naming conventions
-- [ ] Performance (N+1 queries, missing indexes, inefficient loops)
-- [ ] Security (SQL injection, input validation, auth/authz, rate limiting)
-- [ ] Test coverage present
-- [ ] API documentation written (OpenAPI/JSDoc)
+```
+Agent(subagent_type: code-reviewer, prompt: "
+Type: BE
+Task: <task description>
+Changed files:
+- <file 1>
+- <file 2>
+")
+```
 
-Verdict: `APPROVED` (tentative) or `CHANGES REQUIRED` with specific items listed.
+Wait for the subagent to return its verdict.
 
-On `CHANGES REQUIRED`: SendMessage to `be-developer`, return to step 4 after fix.
+On `CHANGES REQUIRED`: SendMessage to `be-developer` with the specific issues listed in the verdict. Return to step 4 after fix.
 
 ### 5. Deep Security Audit
 

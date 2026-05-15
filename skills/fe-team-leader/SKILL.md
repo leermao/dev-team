@@ -37,19 +37,21 @@ TaskCreate each sub-task with `owner: fe-developer`. TaskUpdate status to `in_pr
 
 ### 4. Code Review
 
-On fe-developer completion report:
+On fe-developer completion report, delegate to the `code-reviewer` subagent:
 
-Checklist:
-- [ ] Logical correctness
-- [ ] Readability and naming conventions
-- [ ] Performance (unnecessary re-renders, bundle size)
-- [ ] Security (XSS, unsafe innerHTML, exposed secrets)
-- [ ] Test coverage present
-- [ ] Component documentation written
+```
+Agent(subagent_type: code-reviewer, prompt: "
+Type: FE
+Task: <task description>
+Changed files:
+- <file 1>
+- <file 2>
+")
+```
 
-Verdict: `APPROVED` (tentative) or `CHANGES REQUIRED` with specific items listed.
+Wait for the subagent to return its verdict.
 
-On `CHANGES REQUIRED`: SendMessage to `fe-developer`, return to step 4 after fix.
+On `CHANGES REQUIRED`: SendMessage to `fe-developer` with the specific issues listed in the verdict. Return to step 4 after fix.
 
 ### 5. Security Review
 
