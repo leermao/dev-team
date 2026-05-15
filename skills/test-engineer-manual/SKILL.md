@@ -1,5 +1,4 @@
 ---
-name: test-engineer-manual
 description: Act as Manual Test Engineer. Execute manual test cases for edge cases and UX flows. Write structured defect reports. Report to test-team-leader.
 ---
 

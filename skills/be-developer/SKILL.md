@@ -1,5 +1,4 @@
 ---
-name: be-developer
 description: Act as Backend Developer. Claim tasks from be-team-leader, implement BE code, self-test via curl, write API docs, report completion.
 ---
 

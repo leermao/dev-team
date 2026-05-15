@@ -1,5 +1,4 @@
 ---
-name: dev-team
 description: Launch the 9-agent DAMO Academy development team across a 3x3 tmux pane grid. Use when the user runs /dev-team or asks to start the development team.
 user-invocable: true
 ---

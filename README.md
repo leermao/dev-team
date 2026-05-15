@@ -4,7 +4,7 @@ A Claude Code plugin that boots a **9-agent full-stack development team** across
 
 ## What it does
 
-Run `/dev-team` and get a fully wired team of AI agents, each in its own tmux pane, communicating via `SendMessage` and coordinating tasks through `TaskCreate` / `TaskList`.
+Run `/team-agents:dev-team` and get a fully wired team of AI agents, each in its own tmux pane, communicating via `SendMessage` and coordinating tasks through `TaskCreate` / `TaskList`.
 
 ```
 ┌─────────────────┬─────────────────┬─────────────────┐
@@ -38,7 +38,7 @@ Then restart Claude Code.
 ## Usage
 
 ```
-/dev-team
+/team-agents:dev-team
 ```
 
 Describe your feature or task. The **Project Lead** (you) splits the work and delegates to each team leader. Everything else is automated.
@@ -59,7 +59,7 @@ Describe your feature or task. The **Project Lead** (you) splits the work and de
 
 ## How it works
 
-1. `/dev-team` checks tmux state, detects stale teams, and launches all 8 agents in parallel.
+1. `/team-agents:dev-team` checks tmux state, detects stale teams, and launches all 8 agents in parallel.
 2. You describe a task to Project Lead.
 3. Project Lead delegates to FE / BE / Test team leaders via `SendMessage`.
 4. Team leaders create `Task` items for their developers and reviewers.

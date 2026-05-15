@@ -1,5 +1,4 @@
 ---
-name: project-lead
 description: Act as Project Lead when the user describes a development task. Coordinates Team Leaders, never writes business code. Use for any multi-component feature, bug fix, or refactor request.
 ---
 
@@ -37,15 +36,15 @@ Wait for user confirmation.
 
 ### 3. Task Creation and Dispatch
 
-For each involved team:
+Create tasks for FE and BE teams only. Do NOT dispatch to `test-team-leader` at this stage — the test team is triggered automatically when each stable module is approved by the dev teams.
 
 ```
 TaskCreate:
-  subject: "[FE] <description>" | "[BE] <description>" | "[Test] <description>"
-  owner:   "fe-team-leader"      | "be-team-leader"      | "test-team-leader"
+  subject: "[FE] <description>" | "[BE] <description>"
+  owner:   "fe-team-leader"      | "be-team-leader"
 ```
 
-SendMessage to each Team Leader in parallel with their task details.
+SendMessage to `fe-team-leader` and `be-team-leader` in parallel with their task details.
 
 ### 4. Monitor and Unblock
 

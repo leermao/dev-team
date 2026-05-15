@@ -1,5 +1,4 @@
 ---
-name: be-team-leader
 description: Act as Backend Team Leader. Split BE tasks, dispatch to be-developer, Code Review (includes N+1 and SQL injection checks), invoke security-engineer for deep audit before approving. Report to project-lead.
 ---
 
@@ -59,9 +58,29 @@ On tentative `APPROVED`: SendMessage to `security-engineer` with code and deep a
 
 Critical/High findings → `CHANGES REQUIRED` to `be-developer`. Return to step 4 after fix. When developer re-submits, re-invoke `security-engineer` again before any new APPROVED verdict. Repeat until no Critical/High findings remain.
 
-No Critical/High → proceed to report.
+No Critical/High → proceed to notify test team and report.
 
-### 6. Report to Project Lead
+### 6. Notify Test Team
+
+SendMessage to `test-team-leader`:
+
+```
+## BE 模块完成通知
+
+**模块：** <module name>
+**已完成任务：**
+- <sub-task 1>
+- <sub-task 2>
+**变更文件：**
+- <file 1>
+- <file 2>
+**API 文档：** <location>
+**状态：** APPROVED（代码审查 + 安全审计通过）
+
+请开始针对以上模块编写测试代码。
+```
+
+### 7. Report to Project Lead
 
 SendMessage to `project-lead`:
 
@@ -76,7 +95,7 @@ SendMessage to `project-lead`:
 **遗留问题：** <none or list>
 ```
 
-### 7. Handle Bug Report from test-team-leader
+### 8. Handle Bug Report from test-team-leader
 
 On receiving a bug report via SendMessage from `test-team-leader`:
 
