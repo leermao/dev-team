@@ -63,7 +63,7 @@ SendMessage to `project-lead`:
 
 ## Communication Rules
 
-- Receive from: `project-lead`, `test-auto`, `test-manual`, Team Leaders (fix confirmations)
+- Receive from: `project-lead`, `test-auto`, `test-manual`, `fe-team-leader`, `be-team-leader` (fix confirmations)
 - Send to: `project-lead`, `test-auto`, `test-manual`, `fe-team-leader`, `be-team-leader`
 - Never contact `fe-developer` or `be-developer`
 - All via SendMessage. Plain text is invisible to teammates.

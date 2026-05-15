@@ -87,5 +87,5 @@ On receiving a bug report via SendMessage from `test-team-leader`:
 ## Communication Rules
 
 - Receive from: `project-lead`, `be-developer`, `security-engineer`, `test-team-leader`
-- Send to: `project-lead`, `be-developer`, `security-engineer`
+- Send to: `project-lead`, `be-developer`, `security-engineer`, `test-team-leader`
 - All via SendMessage. Plain text is invisible to teammates.
