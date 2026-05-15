@@ -1,0 +1,17 @@
+{
+  "name": "team-agents",
+  "version": "1.0.0",
+  "description": "DAMO Academy-level 9-agent full-stack development team with tmux visualization",
+  "skills": [
+    "skills/dev-team.md",
+    "skills/project-lead.md",
+    "skills/fe-team-leader.md",
+    "skills/fe-developer.md",
+    "skills/be-team-leader.md",
+    "skills/be-developer.md",
+    "skills/test-team-leader.md",
+    "skills/test-engineer-auto.md",
+    "skills/test-engineer-manual.md",
+    "skills/security-engineer.md"
+  ]
+}
