@@ -126,15 +126,14 @@ user-invocable: true
 
 | Pane position | Role | Teammate name |
 |---|---|---|
-| Top-left | Project Lead | main session |
-| Top-center | FE Team Leader | `fe-team-leader` |
-| Top-right | BE Team Leader | `be-team-leader` |
-| Mid-left | Test Team Leader | `test-team-leader` |
-| Mid-center | FE Developer | `fe-developer` |
-| Mid-right | BE Developer | `be-developer` |
-| Bottom-left | Security Engineer | `security-engineer` |
-| Bottom-center | Test Engineer | `test-engineer` |
-| Bottom-right | Empty | unused |
+| Left half | Team Lead | main session |
+| Right row 1, left half | FE Team Leader | `fe-team-leader` |
+| Right row 1, right half | FE Developer | `fe-developer` |
+| Right row 2, left half | BE Team Leader | `be-team-leader` |
+| Right row 2, right half | BE Developer | `be-developer` |
+| Right row 3, left half | Test Team Leader | `test-team-leader` |
+| Right row 3, right half | Test Engineer | `test-engineer` |
+| Right row 4, full width | Security Engineer | `security-engineer` |
 
 ## Instructions
 

@@ -55,19 +55,18 @@ The team operates at DAMO Academy quality standards with robust, secure code as 
 ## 3. tmux Pane Layout
 
 ```
-┌──────────────────┬──────────────────┬──────────────────┐
-│  Project Lead    │  FE Team Leader  │  BE Team Leader  │
-│  (主会话)         │  (teammate)      │  (teammate)      │
-├──────────────────┼──────────────────┼──────────────────┤
-│  Test TL         │  FE Developer    │  BE Developer    │
-│  (teammate)      │  (teammate)      │  (teammate)      │
-├──────────────────┼──────────────────┼──────────────────┤
-│  Security Eng    │  Test Engineer   │                  │
-│  (teammate)      │  (teammate)      │                  │
-└──────────────────┴──────────────────┴──────────────────┘
+┌────────────────────────┬──────────────────────────────┐
+│                        │ FE Team Leader │ FE Developer│
+│                        ├──────────────────────────────┤
+│ Team Lead              │ BE Team Leader │ BE Developer│
+│ (main session, 50%)    ├──────────────────────────────┤
+│                        │ Test Team Lead │ Test Engineer│
+│                        ├──────────────────────────────┤
+│                        │ Security Engineer           │
+└────────────────────────┴──────────────────────────────┘
 ```
 
-All 8 panes launch at startup. User can monitor all agents simultaneously.
+All 8 panes launch at startup. The main `team-lead` pane occupies the left half of the tmux window. The remaining right half is split into four equal-height rows for FE, BE, Test, and Security. FE, BE, and Test rows are split into equal-width leader/developer panes; Security occupies its full row. The startup flow must verify pane coordinates after applying the layout and report a layout failure instead of falling back to an even grid.
 
 ---
 

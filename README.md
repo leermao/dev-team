@@ -11,16 +11,18 @@ Run `/team-agents:dev-team` and get a fully wired team of AI agents, each in its
 ![team-agents tmux team startup screenshot](screenshot/init.png)
 
 ```
-┌─────────────────┬──────────────────────────────────────┐
-│  team-lead      │  fe-team-leader  │  fe-developer     │
-│  (主会话)        ├──────────────────────────────────────┤
-│                 │  be-team-leader  │  be-developer     │
-│                 ├──────────────────────────────────────┤
-│                 │  test-team-leader  │  test-engineer  │
-│                 ├──────────────────────────────────────┤
-│                 │  security-engineer                   │
-└─────────────────┴──────────────────────────────────────┘
+┌────────────────────────┬──────────────────────────────┐
+│                        │ fe-team-leader │ fe-developer│
+│                        ├──────────────────────────────┤
+│ team-lead              │ be-team-leader │ be-developer│
+│ (主会话, 50%)           ├──────────────────────────────┤
+│                        │ test-team-leader│test-engineer│
+│                        ├──────────────────────────────┤
+│                        │ security-engineer            │
+└────────────────────────┴──────────────────────────────┘
 ```
+
+The startup skill verifies this grouped layout by pane coordinates. It should report a layout failure instead of falling back to an even grid.
 
 ## Requirements
 
