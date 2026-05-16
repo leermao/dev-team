@@ -6,6 +6,10 @@ A Claude Code plugin that boots an **8-agent full-stack development team** acros
 
 Run `/team-agents:dev-team` and get a fully wired team of AI agents, each in its own tmux pane, communicating via `SendMessage` and coordinating tasks through `TaskCreate` / `TaskList`.
 
+## Screenshot
+
+![team-agents tmux team startup screenshot](screenshot/init.png)
+
 ```
 ┌─────────────────┬──────────────────────────────────────┐
 │  team-lead      │  fe-team-leader  │  fe-developer     │
