@@ -7,16 +7,15 @@ A Claude Code plugin that boots an **8-agent full-stack development team** acros
 Run `/team-agents:dev-team` and get a fully wired team of AI agents, each in its own tmux pane, communicating via `SendMessage` and coordinating tasks through `TaskCreate` / `TaskList`.
 
 ```
-┌─────────────────┬─────────────────┬─────────────────┐
-│  Team Lead   │  FE Team Leader │  BE Team Leader │
-│   (you / main)  │  fe-team-leader │  be-team-leader │
-├─────────────────┼─────────────────┼─────────────────┤
-│ Test Team Leader│  FE Developer   │  BE Developer   │
-│ test-team-leader│  fe-developer   │  be-developer   │
-├─────────────────┼─────────────────┼─────────────────┤
-│Security Engineer│ Test Engineer   │                 │
-│security-engineer│ test-engineer   │                 │
-└─────────────────┴─────────────────┴─────────────────┘
+┌─────────────────┬──────────────────────────────────────┐
+│  team-lead      │  fe-team-leader  │  fe-developer     │
+│  (主会话)        ├──────────────────────────────────────┤
+│                 │  be-team-leader  │  be-developer     │
+│                 ├──────────────────────────────────────┤
+│                 │  test-team-leader  │  test-engineer  │
+│                 ├──────────────────────────────────────┤
+│                 │  security-engineer                   │
+└─────────────────┴──────────────────────────────────────┘
 ```
 
 ## Requirements

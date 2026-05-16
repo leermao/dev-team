@@ -1,6 +1,6 @@
 ---
 name: dev-team
-description: Launch the 8-agent DAMO Academy development team across a tmux pane grid. Use when the user runs /dev-team or asks to start the development team.
+description: 当用户执行 /dev-team 命令，或者用户说“启动开发团队”时，自动在 tmux 的 pane 网格里启动一个由 8 个 Agent 组成的 DAMO Academy 开发团队.
 user-invocable: true
 ---
 
@@ -10,21 +10,20 @@ user-invocable: true
 
 `/dev-team` 是团队引导命令，不是具体编码任务。
 
-执行后创建固定团队 `dev-team`，包含 8 个角色，由当前主会话担任 `team-lead`，负责协调而不是被替代。
+执行后创建固定团队 `dev-team`，包含 8 个角色：
 
-`/dev-team` bootstraps the full 8-agent development team across a tmux pane grid.
-
-| Pane position | Role | Teammate name |
+| 角色 | 成员 | 职责 |
 |---|---|---|
-| Top-left | Team Lead | main session |
-| Top-center | FE Team Leader | `fe-team-leader` |
-| Top-right | BE Team Leader | `be-team-leader` |
-| Mid-left | Test Team Leader | `test-team-leader` |
-| Mid-center | FE Developer | `fe-developer` |
-| Mid-right | BE Developer | `be-developer` |
-| Bottom-left | Security Engineer | `security-engineer` |
-| Bottom-center | Test Engineer | `test-engineer` |
-| Bottom-right | Empty | unused |
+| team-lead / teamleader | 当前 Claude Code 主会话 | 计划、拆解任务、分配、协调、验收、最终决策 |
+| fe-team-leader | `fe-team-leader` teammate | 前端任务规划与代码审查，调度 fe-developer |
+| fe-developer | `fe-developer` teammate | 前端实现、自测、报告变更 |
+| be-team-leader | `be-team-leader` teammate | 后端任务规划与代码审查，调度 be-developer |
+| be-developer | `be-developer` teammate | 后端实现、自测、报告变更 |
+| test-team-leader | `test-team-leader` teammate | 测试规划与 bug 路由，调度 test-engineer |
+| test-engineer | `test-engineer` teammate | 测试用例设计与自动化测试 |
+| security-engineer | `security-engineer` teammate | 安全审计（被动调用，不主动发起） |
+
+当前主会话启动后就是 `team-lead`，负责协调而不是被替代。
 
 ## When to use this skill
 
@@ -282,53 +281,7 @@ Operating rules:
 - Plain text is not visible to team-lead; use SendMessage for all team communication.
 ```
 
-### Step 6: Reorganize tmux layout（按团队分组排列）
-
-所有 7 个 teammate 启动后，运行以下 Bash 命令，将同团队成员排到同一行（左右），不同团队上下分隔：
-
-```bash
-CONFIG=~/.claude/teams/dev-team/config.json
-
-get_pane() {
-  jq -r --arg n "$1" '.members[] | select(.name == $n) | .tmuxPaneId' "$CONFIG"
-}
-
-FE_TL=$(get_pane fe-team-leader)
-FE_DEV=$(get_pane fe-developer)
-BE_TL=$(get_pane be-team-leader)
-BE_DEV=$(get_pane be-developer)
-TEST_TL=$(get_pane test-team-leader)
-TEST_ENGINEER=$(get_pane test-engineer)
-
-# Row 1: fe-team-leader | fe-developer
-tmux move-pane -h -s "$FE_DEV" -t "$FE_TL"
-
-# Row 2: be-team-leader | be-developer
-tmux move-pane -h -s "$BE_DEV" -t "$BE_TL"
-
-# Row 3: test-team-leader | test-engineer
-tmux move-pane -h -s "$TEST_ENGINEER" -t "$TEST_TL"
-
-# Row 4: security-engineer（单独一行，无需移动）
-```
-
-目标布局：
-
-```
-┌─────────────────┬──────────────────────────────────────┐
-│  team-lead   │  fe-team-leader  │  fe-developer      │
-│  (主会话)        ├──────────────────────────────────────┤
-│                 │  be-team-leader  │  be-developer      │
-│                 ├──────────────────────────────────────┤
-│                 │  test-team-leader  │  test-engineer   │
-│                 ├──────────────────────────────────────┤
-│                 │  security-engineer                    │
-└─────────────────┴──────────────────────────────────────┘
-```
-
-如果任何 paneId 为空（成员还未完全就绪），跳过该命令，等待所有 teammate 就绪后再重新执行此步骤。
-
-### Step 7: Project-lead operating protocol
+### Step 6: Project-lead operating protocol
 
 启动后，当前主会话就是 `team-lead`，必须遵守：
 
@@ -341,9 +294,53 @@ tmux move-pane -h -s "$TEST_ENGINEER" -t "$TEST_TL"
 - 收尾或结束团队时，优先使用现有 `/dismiss` skill 或向 teammate 发送 shutdown_request。
 - 不要创建 `fe-team-leader-2`、`fe-developer-2` 或其他替代成员来绕过 stale state。
 
-### Step 8: Ready signal
+### Step 7: Apply required tmux grouped layout
 
-等待所有 7 个 teammate 都发送 idle/ready 消息后，向用户报告：
+After all 7 teammates have sent idle/ready messages, apply the required grouped tmux layout.
+
+Target layout:
+
+```text
+┌─────────────────┬──────────────────────────────────────┐
+│  team-lead      │  fe-team-leader  │  fe-developer     │
+│  (main session) ├──────────────────────────────────────┤
+│                 │  be-team-leader  │  be-developer     │
+│                 ├──────────────────────────────────────┤
+│                 │  test-team-leader│  test-engineer    │
+│                 ├──────────────────────────────────────┤
+│                 │  security-engineer                   │
+└─────────────────┴──────────────────────────────────────┘
+```
+
+Layout intent:
+
+- The current main session, `team-lead`, must stay on the left side.
+- The right side is grouped by discipline.
+- Row 1: `fe-team-leader` next to `fe-developer`.
+- Row 2: `be-team-leader` next to `be-developer`.
+- Row 3: `test-team-leader` next to `test-engineer`.
+- Row 4: `security-engineer` spans the full right-side width.
+- Do not use an even grid layout unless the required grouped layout cannot be applied.
+
+Before applying the layout, validate:
+
+- `jq` is available.
+- All 7 canonical teammates exist.
+- Every teammate has a non-empty `tmuxPaneId`.
+- Every `tmuxPaneId` exists in `tmux list-panes -a -F '#{pane_id}'`.
+- If any validation fails, do not rearrange panes. Report the exact missing or invalid pane and keep the team running.
+
+Apply the grouped layout after validation. Prefer deterministic `tmux` pane operations that preserve the left-side `team-lead` pane and group the right-side teammate panes by discipline. If a pane operation fails, stop rearranging panes, report the failed command and reason, and keep the team running.
+
+After applying the layout, verify the result with:
+
+```bash
+tmux list-panes -F '#{pane_id} #{pane_left} #{pane_top} #{pane_width} #{pane_height}'
+```
+
+Only report `dev-team ready` after the team is running and the layout command has either succeeded or the layout failure has been explicitly reported.
+
+When ready, report:
 
 ```markdown
 dev-team 已就绪（8人团队）
@@ -369,6 +366,7 @@ dev-team 已就绪（8人团队）
 3. 确认当前 terminal window 出现八角色 panes：当前 `team-lead`，以及 7 个 teammate panes。
 4. 确认 `~/.claude/teams/dev-team/config.json` 中有 7 个 canonical members，且都有有效 `tmuxPaneId`。
 5. 执行 `tmux list-panes -a -F '#{pane_id}'`，确认上述 pane id 存在。
-6. 通过 team-lead 发一个小任务，fe/be team leader 应规划并分配，developer 应实现，test 团队应测试。
-7. team 存活时再次运行 `/dev-team`，应识别现有有效 team，不创建 `fe-team-leader-2` 等替代成员。
-8. 只有在安全情况下模拟 stale state；skill 只能清理 `dev-team` state 并重建 canonical panes。
+6. Confirm the required grouped tmux layout was applied: `team-lead` stays on the left, and the right side is grouped into FE, BE, Test, and Security rows. Verify with `tmux list-panes -F '#{pane_id} #{pane_left} #{pane_top} #{pane_width} #{pane_height}'`. If layout application failed, the ready report must explicitly include the failure reason.
+7. 通过 team-lead 发一个小任务，fe/be team leader 应规划并分配，developer 应实现，test 团队应测试。
+8. team 存活时再次运行 `/dev-team`，应识别现有有效 team，不创建 `fe-team-leader-2` 等替代成员。
+9. 只有在安全情况下模拟 stale state；skill 只能清理 `dev-team` state 并重建 canonical panes。

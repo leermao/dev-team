@@ -1,5 +1,5 @@
 ---
-description: 启动1 tmux 三角色 TDD agent team（team-lead + developer + reviewer），由 lead 计划分配、developer 编码、reviewer 挑刺审查
+description: 启动 tmux 三角色 TDD agent team（team-lead + developer + reviewer），由 lead 计划分配、developer 编码、reviewer 挑刺审查
 user-invocable: true
 ---
 
@@ -164,7 +164,22 @@ Operating rules:
 
 ### Step 7: Ready signal
 
-等待 `developer` 和 `reviewer` 都发送 idle/ready 消息后，向用户报告：
+等待 `developer` 和 `reviewer` 都发送 idle/ready 消息后，立即应用三列水平布局，再向用户报告：
+
+```bash
+tmux select-layout even-horizontal
+```
+
+此时三个 pane 均已稳定存在，布局可以正确生效：
+
+```
+┌─────────────┬─────────────┬─────────────┐
+│  team-lead  │  developer  │  reviewer   │
+│  (当前会话) │             │             │
+└─────────────┴─────────────┴─────────────┘
+```
+
+布局生效后向用户报告：
 
 ```markdown
 TDD team 已就绪。
@@ -187,6 +202,7 @@ TDD team 已就绪。
 3. 确认当前 terminal window 出现三角色 panes：当前 `team-lead`，以及 `developer`、`reviewer`。
 4. 确认 `~/.claude/teams/tdd-team/config.json` 中有 canonical members：`developer`、`reviewer`，且都有有效 `tmuxPaneId`。
 5. 执行 `tmux list-panes -a -F '#{pane_id}'`，确认上述 pane id 存在。
+5.5. 确认 tmux 布局已应用：team-lead | developer | reviewer 三列等宽水平排列（`even-horizontal`）。布局在 Step 7 收到两个 ready 信号后应用，此时三个 pane 已稳定存在。如布局未自动生效，手动执行 `tmux select-layout even-horizontal` 验证。
 6. 通过 lead 发一个小任务，developer 应实现或计划实现，reviewer 应给出具体 critique，不要 rubber-stamp。
 7. team 存活时再次运行 `/tdd-loop`，应识别现有有效 team，不创建 `developer-2` / `reviewer-2`。
 8. 只有在安全情况下模拟 stale state；skill 只能清理 `tdd-team` state 并重建 canonical panes。
