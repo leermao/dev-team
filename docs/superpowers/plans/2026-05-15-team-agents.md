@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Claude Code plugin providing a 9-agent DAMO Academy-level development team visualized across a 3×3 tmux pane grid.
+**Goal:** Build a Claude Code plugin providing an 8-agent DAMO Academy-level development team visualized across a tmux pane grid.
 
-**Architecture:** Each role is a Skill markdown file. `/dev-team` is the entry-point skill that bootstraps 8 teammate panes via TeamCreate + Agent tool. Project Lead coordinates Team Leaders via SendMessage; Team Leaders coordinate their engineers. Communication is vertical-primary; horizontal engineer contact is exceptional and only when docs are insufficient.
+**Architecture:** Each role is a Skill markdown file. `/dev-team` is the entry-point skill that bootstraps 7 teammate panes via TeamCreate + Agent tool. Project Lead coordinates Team Leaders via SendMessage; Team Leaders coordinate their engineers. Communication is vertical-primary; horizontal engineer contact is exceptional and only when docs are insufficient.
 
 **Tech Stack:** Claude Code Skills (Markdown), Claude Code TeamCreate / SendMessage / TaskCreate APIs, tmux pane management.
 
@@ -14,16 +14,15 @@
 
 | File | Responsibility |
 |------|----------------|
-| `plugin.json` | Manifest listing all 10 skill files |
-| `skills/dev-team.md` | Startup: preconditions, stale detection, TeamCreate, launch 8 teammates |
+| `plugin.json` | Manifest listing all 9 skill files |
+| `skills/dev-team.md` | Startup: preconditions, stale detection, TeamCreate, launch 7 teammates |
 | `skills/project-lead.md` | Coordinate Team Leaders, aggregate reports, deliver to user |
 | `skills/fe-team-leader.md` | Split FE tasks, dispatch to fe-developer, Code Review, invoke security-engineer |
 | `skills/fe-developer.md` | Implement FE code, self-test, write component docs, report to fe-team-leader |
 | `skills/be-team-leader.md` | Split BE tasks, dispatch to be-developer, Code Review, invoke security-engineer |
 | `skills/be-developer.md` | Implement BE code, self-test, write API docs, report to be-team-leader |
-| `skills/test-team-leader.md` | Split test tasks, dispatch to test-auto/test-manual, route bugs to TLs |
-| `skills/test-engineer-auto.md` | Jest/Cypress tests, coverage ≥ 80%, report to test-team-leader |
-| `skills/test-engineer-manual.md` | Manual test cases, defect reports, report to test-team-leader |
+| `skills/test-team-leader.md` | Plan test coverage, dispatch to test-engineer, route bugs to TLs |
+| `skills/test-engineer.md` | Design test cases, write automated tests, coverage ≥ 80%, report to test-team-leader |
 | `skills/security-engineer.md` | OWASP Top 10 audit on invocation, report findings to invoking TL |
 
 ---
@@ -71,7 +70,7 @@ Create `/Users/leermao/study/team-agents/plugin.json`:
 {
   "name": "team-agents",
   "version": "1.0.0",
-  "description": "DAMO Academy-level 9-agent full-stack development team with tmux visualization",
+  "description": "DAMO Academy-level 8-agent full-stack development team with tmux visualization",
   "skills": [
     "skills/dev-team.md",
     "skills/project-lead.md",
@@ -80,8 +79,7 @@ Create `/Users/leermao/study/team-agents/plugin.json`:
     "skills/be-team-leader.md",
     "skills/be-developer.md",
     "skills/test-team-leader.md",
-    "skills/test-engineer-auto.md",
-    "skills/test-engineer-manual.md",
+    "skills/test-engineer.md",
     "skills/security-engineer.md"
   ]
 }
@@ -116,7 +114,7 @@ Create `/Users/leermao/study/team-agents/skills/dev-team.md`:
 ````markdown
 ---
 name: dev-team
-description: Launch the 9-agent DAMO Academy development team across a 3x3 tmux pane grid. Use when the user runs /dev-team or asks to start the development team.
+description: Launch the 8-agent DAMO Academy development team across a tmux pane grid. Use when the user runs /dev-team or asks to start the development team.
 user-invocable: true
 ---
 
@@ -124,7 +122,7 @@ user-invocable: true
 
 ## Purpose
 
-`/dev-team` bootstraps the full 9-agent development team across a 3×3 tmux pane grid.
+`/dev-team` bootstraps the full 8-agent development team across a tmux pane grid.
 
 | Pane position | Role | Teammate name |
 |---|---|---|
@@ -135,8 +133,8 @@ user-invocable: true
 | Mid-center | FE Developer | `fe-developer` |
 | Mid-right | BE Developer | `be-developer` |
 | Bottom-left | Security Engineer | `security-engineer` |
-| Bottom-center | Test Auto | `test-auto` |
-| Bottom-right | Test Manual | `test-manual` |
+| Bottom-center | Test Engineer | `test-engineer` |
+| Bottom-right | Empty | unused |
 
 ## Instructions
 
@@ -158,7 +156,7 @@ Check `~/.claude/teams/dev-team/config.json`:
 - File absent → skip to Step 4.
 - File present → read it. The team is **valid** only when ALL conditions are true:
   - Status is `active`
-  - All 8 canonical names present: `fe-team-leader`, `fe-developer`, `be-team-leader`, `be-developer`, `test-team-leader`, `test-auto`, `test-manual`, `security-engineer`
+  - All 7 canonical names present: `fe-team-leader`, `fe-developer`, `be-team-leader`, `be-developer`, `test-team-leader`, `test-engineer`, `security-engineer`
   - Every teammate's `tmuxPaneId` appears in the live pane list from Step 1
 
 If valid → skip Steps 3–5 and report:
@@ -174,8 +172,7 @@ dev-team 已在运行。
 | BE Team Leader    | ready |
 | BE Developer      | ready |
 | Test Team Leader  | ready |
-| Test Auto         | ready |
-| Test Manual       | ready |
+| Test Engineer     | ready |
 | Security Engineer | ready |
 ```
 
@@ -185,7 +182,7 @@ Any condition fails → stale, proceed to Step 3.
 
 Scope: only `dev-team`. Never touch other teams, panes, code, or user files.
 
-1. SendMessage to each of the 8 canonical names with `type: shutdown_request`, content: `清理 stale dev-team，准备重新启动。` Ignore send failures.
+1. SendMessage to each of the 7 canonical names with `type: shutdown_request`, content: `Cleaning stale dev-team state before restarting.` Ignore send failures.
 2. Call TeamDelete for `dev-team`.
 3. If TeamDelete succeeds → proceed to Step 4.
 4. If TeamDelete fails and stale panes are confirmed absent → tell user: "将只清理 dev-team 的 stale state，不影响其他团队、pane、代码或用户文件。" Then delete only:
@@ -196,12 +193,12 @@ Scope: only `dev-team`. Never touch other teams, panes, code, or user files.
 
 Call TeamCreate:
 - `team_name`: `dev-team`
-- `description`: `DAMO Academy 9-agent full-stack development team`
+- `description`: `DAMO Academy 8-agent full-stack development team`
 - `agent_type`: `team-lead`
 
-### Step 5: Launch 8 Teammates (Single Parallel Call)
+### Step 5: Launch 7 Teammates (Single Parallel Call)
 
-Launch all 8 in one parallel Agent tool call. All: `mode: bypassPermissions`, `run_in_background: true`.
+Launch all 7 in one parallel Agent tool call. All: `mode: bypassPermissions`, `run_in_background: true`.
 
 **fe-team-leader**
 - name: `fe-team-leader`
@@ -306,48 +303,32 @@ The project lead is the main session (project-lead / teamleader).
 Rules:
 - Wait for task assignment from project-lead via SendMessage.
 - Break tasks into sub-tasks covering: happy path / boundary values / error paths / security scenarios.
-- Assign automated tests (owner: test-auto) and manual tests (owner: test-manual) via TaskCreate + SendMessage.
-- Bug routing: receive bug from test-auto/test-manual → relay to fe-team-leader or be-team-leader (never directly to developer). Track fix + re-test.
+- Assign test-case implementation tasks to `test-engineer` via TaskCreate + SendMessage.
+- Bug routing: receive bug from test-engineer → relay to fe-team-leader or be-team-leader (never directly to developer). Track fix + automated re-test.
 - Report to project-lead via SendMessage: coverage % / uncovered modules / bug list (fixed/unfixed).
 - Never contact fe-developer or be-developer directly.
 - All communication via SendMessage. Plain text is invisible to teammates.
 ```
 
-**test-auto**
-- name: `test-auto`
-- subagent_type: `test-engineer-auto`
+**test-engineer**
+- name: `test-engineer`
+- subagent_type: `test-engineer`
 - team_name: `dev-team`
 - prompt:
 ```
-Your name is exactly `test-auto`.
-You are the Automated Test Engineer in the dev-team.
+Your name is exactly `test-engineer`.
+You are the Test Engineer in the dev-team.
 Your team leader is `test-team-leader`.
 
 Rules:
-- Check TaskList on startup and when idle. Claim tasks with owner: test-auto.
+- Check TaskList on startup and when idle. Claim tasks with owner: test-engineer.
 - Tech stack: Jest / Mocha / Vitest / Cypress / Playwright / Puppeteer / Selenium / Testing Library.
-- Write unit tests + integration tests. Target coverage ≥ 80%.
+- Design test cases, then implement them as repeatable automated tests.
+- Cover happy paths, boundary values, error paths, integration behavior, E2E flows when applicable, and security-relevant inputs when applicable.
+- Do not perform manual exploratory testing.
+- Target coverage ≥ 80%.
 - Run: npx jest --coverage or npx vitest run --coverage.
-- Report to test-team-leader via SendMessage: Test files / Coverage % / Uncovered modules / Bugs found (with file:line and severity).
-- Plain text is invisible to teammates. Use SendMessage for all communication.
-```
-
-**test-manual**
-- name: `test-manual`
-- subagent_type: `test-engineer-manual`
-- team_name: `dev-team`
-- prompt:
-```
-Your name is exactly `test-manual`.
-You are the Manual Test Engineer in the dev-team.
-Your team leader is `test-team-leader`.
-
-Rules:
-- Check TaskList on startup and when idle. Claim tasks with owner: test-manual.
-- Focus on edge cases, UX flows, and scenarios hard to automate.
-- Defect report format: Issue / Steps to reproduce / Expected / Actual / Severity (Critical/High/Medium/Low).
-- Report to test-team-leader via SendMessage: Cases executed / Passed / Failed / Defect reports / UX observations.
-- Contact only test-team-leader. Never contact developers directly.
+- Report to test-team-leader via SendMessage: Test cases / Test files / Coverage % / Uncovered modules / Bugs found (with file:line and severity).
 - Plain text is invisible to teammates. Use SendMessage for all communication.
 ```
 
@@ -372,10 +353,10 @@ Rules:
 
 ### Step 6: Ready Signal
 
-Wait for all 8 teammates to send an idle/ready message. Then output:
+Wait for all 7 teammates to send an idle/ready message. Then output:
 
 ```
-dev-team 已就绪（9人团队）
+dev-team 已就绪（8人团队）
 
 | 角色              | Pane     | 状态  |
 |-------------------|----------|-------|
@@ -385,8 +366,7 @@ dev-team 已就绪（9人团队）
 | BE Team Leader    | <paneId> | ready |
 | BE Developer      | <paneId> | ready |
 | Test Team Leader  | <paneId> | ready |
-| Test Auto         | <paneId> | ready |
-| Test Manual       | <paneId> | ready |
+| Test Engineer     | <paneId> | ready |
 | Security Engineer | <paneId> | ready |
 
 现在可以描述开发任务，我作为 Project Lead 负责拆分和分配。
@@ -395,9 +375,9 @@ dev-team 已就绪（9人团队）
 ## Verification Checklist
 
 1. `skills/dev-team.md` frontmatter has `user-invocable: true`.
-2. In tmux, run `/dev-team` — confirm 9 panes appear.
-3. `~/.claude/teams/dev-team/config.json` contains all 8 canonical names with valid `tmuxPaneId`.
-4. `tmux list-panes -a -F '#{pane_id}'` shows all 8 pane IDs.
+2. In tmux, run `/dev-team` — confirm 8 panes appear.
+3. `~/.claude/teams/dev-team/config.json` contains all 7 canonical names with valid `tmuxPaneId`.
+4. `tmux list-panes -a -F '#{pane_id}'` shows all 7 pane IDs.
 5. Run `/dev-team` again while alive — detects existing team, no new panes.
 6. Kill one pane, run `/dev-team` — detects stale, recreates cleanly.
 ````
@@ -407,11 +387,11 @@ dev-team 已就绪（9人团队）
 Confirm the written file contains:
 - [ ] `user-invocable: true` in frontmatter
 - [ ] Step 1 checks `$TMUX`, `settings.json`, tmux pane list
-- [ ] Step 2 validates all 8 canonical names + pane IDs
+- [ ] Step 2 validates all 7 canonical names + pane IDs
 - [ ] Step 3 cleanup scoped to `dev-team` only
 - [ ] Step 4 TeamCreate with `team_name: dev-team`
-- [ ] Step 5 exactly 8 teammates in one parallel call
-- [ ] Step 6 ready table with all 9 roles
+- [ ] Step 5 exactly 7 teammates in one parallel call
+- [ ] Step 6 ready table with all 8 roles
 
 - [ ] **Step 3: Commit**
 
@@ -993,14 +973,14 @@ Create `/Users/leermao/study/team-agents/skills/test-team-leader.md`:
 ```markdown
 ---
 name: test-team-leader
-description: Act as Test Team Leader. Split test tasks across test-auto and test-manual. Route bug reports to the responsible Team Leader (not directly to developers). Report to project-lead.
+description: Act as Test Team Leader. Plan test coverage, assign test-case implementation to test-engineer, route bug reports to the responsible Team Leader, and report to project-lead.
 ---
 
 # Test Team Leader
 
 ## Identity
 
-Your name is exactly `test-team-leader`. You coordinate `test-auto` and `test-manual`. You route bugs to Team Leaders, not developers. You report to `project-lead`.
+Your name is exactly `test-team-leader`. You coordinate `test-engineer`. You route bugs to Team Leaders, not developers. You report to `project-lead`.
 
 ## Workflow
 
@@ -1014,21 +994,21 @@ Break into sub-tasks covering all four scenarios:
 
 | Scenario | Assignee |
 |----------|----------|
-| Unit + integration tests | `test-auto` |
-| E2E automated flows | `test-auto` |
-| Manual edge cases + UX | `test-manual` |
-| Security input fuzzing (manual) | `test-manual` |
+| Unit + integration test cases | `test-engineer` |
+| E2E automated test cases | `test-engineer` |
+| Boundary and UX-flow test cases | `test-engineer` |
+| Security input test cases | `test-engineer` |
 
-TaskCreate each sub-task with correct owner. SendMessage to `test-auto` and `test-manual` in parallel.
+TaskCreate each sub-task with owner `test-engineer`. SendMessage to `test-engineer` with the test-case scope and expected reporting format. Do not assign manual testing.
 
 ### 3. Bug Routing
 
-On bug report from `test-auto` or `test-manual`:
+On bug report from `test-engineer`:
 
 1. Determine owning team (FE or BE) from bug location
 2. SendMessage to `fe-team-leader` or `be-team-leader` with full defect report
 3. TaskCreate bug fix task with `owner: <responsible-team-leader>`
-4. On Team Leader fix confirmation: SendMessage to `test-auto` or `test-manual` for re-test
+4. On Team Leader fix confirmation: SendMessage to `test-engineer` for automated re-test
 5. On re-test pass: TaskUpdate bug task to `completed`
 
 Never contact `fe-developer` or `be-developer` directly.
@@ -1038,20 +1018,20 @@ Never contact `fe-developer` or `be-developer` directly.
 SendMessage to `project-lead`:
 
 ```
-## Test 团队报告
+## Test Team Report
 
-**覆盖率：** <percentage>%
-**未覆盖模块：** <list or none>
-**Bug 列表：**
-- [已修复] <description>
-- [未修复] <description>（原因：<blocking factor>）
-**手动测试结论：** <summary>
+**Coverage:** <percentage>%
+**Uncovered modules:** <list or none>
+**Bug list:**
+- [Fixed] <description>
+- [Unfixed] <description> (reason: <blocking factor>)
+**Test-case conclusion:** <summary>
 ```
 
 ## Communication Rules
 
-- Receive from: `project-lead`, `test-auto`, `test-manual`, Team Leaders (fix confirmations)
-- Send to: `project-lead`, `test-auto`, `test-manual`, `fe-team-leader`, `be-team-leader`
+- Receive from: `project-lead`, `test-engineer`, Team Leaders (fix confirmations)
+- Send to: `project-lead`, `test-engineer`, `fe-team-leader`, `be-team-leader`
 - Never contact `fe-developer` or `be-developer`
 - All via SendMessage. Plain text is invisible to teammates.
 ```
@@ -1072,26 +1052,26 @@ git commit -m "feat: add test-team-leader skill"
 
 ---
 
-### Task 10: Write test-engineer-auto.md
+### Task 10: Write test-engineer.md
 
 **Files:**
-- Create: `skills/test-engineer-auto.md`
+- Create: `skills/test-engineer.md`
 
 - [ ] **Step 1: Write the skill file**
 
-Create `/Users/leermao/study/team-agents/skills/test-engineer-auto.md`:
+Create `/Users/leermao/study/team-agents/skills/test-engineer.md`:
 
 ```markdown
 ---
-name: test-engineer-auto
-description: Act as Automated Test Engineer. Write Jest/Cypress/Playwright tests targeting ≥ 80% coverage. Report results and bugs to test-team-leader.
+name: test-engineer
+description: Act as Test Engineer. Design and implement automated test cases targeting >= 80% coverage. Report results and bugs to test-team-leader.
 ---
 
-# Automated Test Engineer
+# Test Engineer
 
 ## Identity
 
-Your name is exactly `test-auto`. You write automated tests and report to `test-team-leader`.
+Your name is exactly `test-engineer`. You design, write, and run automated test cases. You report to `test-team-leader`.
 
 ## Skill Matrix
 
@@ -1101,9 +1081,22 @@ Jest / Mocha / Vitest / Jasmine / Cypress / Playwright / Puppeteer / Selenium / 
 
 ### 1. Check Tasks
 
-On startup and when idle: TaskList. Claim tasks with `owner: test-auto`, status `pending`. TaskUpdate to `in_progress`.
+On startup and when idle: TaskList. Claim tasks with `owner: test-engineer`, status `pending`. TaskUpdate to `in_progress`.
 
-### 2. Write Tests
+### 2. Design Test Cases
+
+Before writing code, define test cases covering:
+
+- Happy paths
+- Boundary values
+- Error paths
+- Integration behavior
+- E2E flows when the feature has user-facing workflows
+- Security-relevant inputs when the feature accepts external input
+
+Do not perform manual exploratory testing. Convert expected behavior into repeatable automated tests.
+
+### 3. Write Tests
 
 Pattern for every suite:
 
@@ -1135,7 +1128,7 @@ describe('LoginForm', () => {
 });
 ```
 
-### 3. Run Coverage
+### 4. Run Coverage
 
 ```bash
 npx jest --coverage --coverageThreshold='{"global":{"lines":80}}'
@@ -1143,22 +1136,24 @@ npx jest --coverage --coverageThreshold='{"global":{"lines":80}}'
 npx vitest run --coverage
 ```
 
-### 4. Report to test-team-leader
+### 5. Report to test-team-leader
 
 SendMessage to `test-team-leader`:
 
 ```
-## 自动化测试报告
+## Test Engineer Report
 
-**测试文件：**
+**Test files:**
 - <test file 1>
 - <test file 2>
-**覆盖率：** <percentage>%
-**未覆盖模块：** <list or none>
-**结果：** <passed count> passed / <failed count> failed
-**Bugs 发现：**
-- Bug 1: <description> | 位置: <file:line> | 严重度: Critical/High/Medium/Low
-**用时：** <duration>
+**Designed cases:**
+- <case category>: <count>
+**Coverage:** <percentage>%
+**Uncovered modules:** <list or none>
+**Result:** <passed count> passed / <failed count> failed
+**Bugs found:**
+- Bug 1: <description> | Location: <file:line> | Severity: Critical/High/Medium/Low
+**Duration:** <duration>
 ```
 
 ## Communication Rules
@@ -1170,6 +1165,7 @@ SendMessage to `test-team-leader`:
 - [ ] **Step 2: Verify**
 
 - [ ] describe/it pattern with arrange/act/assert shown
+- [ ] Test-case design step shown
 - [ ] Coverage command with threshold shown
 - [ ] Report includes coverage % and uncovered modules
 - [ ] Bug report format with file:line and severity
@@ -1177,102 +1173,13 @@ SendMessage to `test-team-leader`:
 - [ ] **Step 3: Commit**
 
 ```bash
-git add skills/test-engineer-auto.md
-git commit -m "feat: add test-engineer-auto skill"
+git add skills/test-engineer.md
+git commit -m "feat: add test-engineer skill"
 ```
 
 ---
 
-### Task 11: Write test-engineer-manual.md
-
-**Files:**
-- Create: `skills/test-engineer-manual.md`
-
-- [ ] **Step 1: Write the skill file**
-
-Create `/Users/leermao/study/team-agents/skills/test-engineer-manual.md`:
-
-```markdown
----
-name: test-engineer-manual
-description: Act as Manual Test Engineer. Execute manual test cases for edge cases and UX flows. Write structured defect reports. Report to test-team-leader.
----
-
-# Manual Test Engineer
-
-## Identity
-
-Your name is exactly `test-manual`. You test edge cases and UX flows. You report to `test-team-leader` only.
-
-## Workflow
-
-### 1. Check Tasks
-
-On startup and when idle: TaskList. Claim tasks with `owner: test-manual`, status `pending`. TaskUpdate to `in_progress`.
-
-### 2. Execute Test Cases
-
-For each scenario:
-
-1. Read feature requirements and component/API documentation
-2. Define test cases covering: UX flow correctness / edge input values / error messages / accessibility / cross-browser behavior
-3. Execute each case
-4. Record: PASSED or FAILED
-
-### 3. Write Defect Reports
-
-```
-## Defect Report
-
-**ID:** DEF-<sequence number>
-**Title:** <concise description>
-**Severity:** Critical / High / Medium / Low
-**Steps to Reproduce:**
-1. <step 1>
-2. <step 2>
-3. <step 3>
-**Expected:** <what should happen>
-**Actual:** <what actually happened>
-**Environment:** <browser / OS / version if relevant>
-```
-
-### 4. Report to test-team-leader
-
-SendMessage to `test-team-leader`:
-
-```
-## 手动测试报告
-
-**执行用例数：** <count>
-**通过：** <count>
-**失败：** <count>
-**Defect Reports：**
-<paste each defect report>
-**UX 观察：** <notable UX issues that are not bugs but worth noting>
-```
-
-## Communication Rules
-
-- All via SendMessage. Plain text is invisible to teammates.
-- Contact `test-team-leader` only. Never contact developers directly.
-```
-
-- [ ] **Step 2: Verify**
-
-- [ ] Defect report has all required fields (ID, Severity, Steps, Expected, Actual)
-- [ ] UX observations section separate from bugs
-- [ ] Report goes to test-team-leader only
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add skills/test-engineer-manual.md
-git commit -m "feat: add test-engineer-manual skill"
-```
-
----
-
-### Task 12: Write security-engineer.md
+### Task 11: Write security-engineer.md
 
 **Files:**
 - Create: `skills/security-engineer.md`
@@ -1372,7 +1279,7 @@ git commit -m "feat: add security-engineer skill"
 
 ---
 
-### Task 13: Install Plugin
+### Task 12: Install Plugin
 
 **Files:**
 - Create: symlinks at `~/.claude/plugins/team-agents/`
@@ -1402,13 +1309,13 @@ plugin.json -> /Users/leermao/study/team-agents/plugin.json
 skills -> /Users/leermao/study/team-agents/skills
 ```
 
-- [ ] **Step 4: Verify all 10 skill files accessible**
+- [ ] **Step 4: Verify all 9 skill files accessible**
 
 ```bash
 ls ~/.claude/plugins/team-agents/skills/
 ```
 
-Expected: 10 `.md` files.
+Expected: 9 `.md` files.
 
 - [ ] **Step 5: Commit install notes**
 
@@ -1419,7 +1326,7 @@ git commit -m "chore: add plugin install instructions via symlink"
 
 ---
 
-### Task 14: End-to-End Verification
+### Task 13: End-to-End Verification
 
 - [ ] **Step 1: Verify skill is discoverable**
 
@@ -1431,7 +1338,7 @@ In a tmux Claude Code session, type `/dev` and confirm `dev-team` appears in the
 /dev-team
 ```
 
-Expected: 9 tmux panes in 3×3 layout. All agents report ready.
+Expected: 8 tmux panes in the team layout. All agents report ready.
 
 - [ ] **Step 3: Stale detection**
 

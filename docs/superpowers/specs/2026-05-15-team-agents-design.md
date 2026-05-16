@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-A Claude Code plugin that provides a 9-agent development team using Skills + Subagents, rendered across a 3×3 tmux pane grid so the user can monitor every agent simultaneously.
+A Claude Code plugin that provides an 8-agent development team using Skills + Subagents, rendered across a tmux pane grid so the user can monitor every agent simultaneously.
 
 The team operates at DAMO Academy quality standards with robust, secure code as a hard requirement.
 
@@ -32,10 +32,10 @@ The team operates at DAMO Academy quality standards with robust, secure code as 
         │ FE TL        │ │ BE TL        │ │ Test TL      │
         └──────┬───────┘ └──────┬───────┘ └──┬───────┬───┘
                ↕ tasks/review   ↕             ↕       ↕
-        ┌──────────────┐ ┌──────────────┐ ┌──────┐ ┌────────┐
-        │ FE Dev       │ │ BE Dev       │ │ Test │ │ Test   │
-        └──────────────┘ └──────────────┘ │ Auto │ │ Manual │
-               ↔ optional only            └──────┘ └────────┘
+        ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+        │ FE Dev       │ │ BE Dev       │ │ Test Engineer│
+        └──────────────┘ └──────────────┘ └──────────────┘
+               ↔ optional only
 
                     ┌───────────────────────┐
                     │   Security Engineer   │
@@ -52,7 +52,7 @@ The team operates at DAMO Academy quality standards with robust, secure code as 
 
 ---
 
-## 3. tmux Pane Layout (3×3 Grid)
+## 3. tmux Pane Layout
 
 ```
 ┌──────────────────┬──────────────────┬──────────────────┐
@@ -62,12 +62,12 @@ The team operates at DAMO Academy quality standards with robust, secure code as 
 │  Test TL         │  FE Developer    │  BE Developer    │
 │  (teammate)      │  (teammate)      │  (teammate)      │
 ├──────────────────┼──────────────────┼──────────────────┤
-│  Security Eng    │  Test Auto       │  Test Manual     │
-│  (teammate)      │  (teammate)      │  (teammate)      │
+│  Security Eng    │  Test Engineer   │                  │
+│  (teammate)      │  (teammate)      │                  │
 └──────────────────┴──────────────────┴──────────────────┘
 ```
 
-All 9 panes launch at startup. User can monitor all agents simultaneously.
+All 8 panes launch at startup. User can monitor all agents simultaneously.
 
 ---
 
@@ -83,8 +83,7 @@ All 9 panes launch at startup. User can monitor all agents simultaneously.
 │   ├── be-team-leader.md        # Backend Team Leader
 │   ├── be-developer.md          # Backend Developer
 │   ├── test-team-leader.md      # Test Team Leader
-│   ├── test-engineer-auto.md    # Automated Test Engineer
-│   ├── test-engineer-manual.md  # Manual Test Engineer
+│   ├── test-engineer.md         # Test Engineer
 │   └── security-engineer.md    # Security Engineer
 └── plugin.json                  # Plugin manifest
 ```
@@ -108,7 +107,7 @@ description: <trigger condition>
 
 | User Input | Execution |
 |------------|-----------|
-| `/dev-team` | Launch all 9 agents across 3×3 tmux panes |
+| `/dev-team` | Launch all 8 agents across tmux panes |
 | `/project-lead build a user login module` | Project Lead takes over, splits and dispatches to Team Leaders |
 | `/fe-developer implement login form component` | Directly invoke FE Dev, bypass Team Lead |
 | `/security-engineer audit this code` | Directly invoke Security Engineer |
@@ -132,7 +131,7 @@ Read `~/.claude/teams/dev-team/config.json`:
 - File absent → proceed to create
 - File present → valid only if ALL of the following are true:
   - Status is active
-  - All 8 canonical teammate names exist: `fe-team-leader`, `fe-developer`, `be-team-leader`, `be-developer`, `test-team-leader`, `test-auto`, `test-manual`, `security-engineer`
+  - All 7 canonical teammate names exist: `fe-team-leader`, `fe-developer`, `be-team-leader`, `be-developer`, `test-team-leader`, `test-engineer`, `security-engineer`
   - Every teammate has a `tmuxPaneId` present in the live pane list
 - Any condition fails → stale, proceed to cleanup
 
@@ -153,14 +152,14 @@ Scope: only `dev-team`. Never touch other teams, panes, or user files.
 ```
 TeamCreate:
   team_name: dev-team
-  description: DAMO Academy 9-agent full-stack development team
+  description: DAMO Academy 8-agent full-stack development team
   agent_type: team-lead
 ```
 
-### Step 5 — Launch 8 Teammates (parallel)
+### Step 5 — Launch 7 Teammates (parallel)
 
 All teammates: `mode: bypassPermissions`, `run_in_background: true`.  
-Launch all 8 in a single parallel tool call.
+Launch all 7 in a single parallel tool call.
 
 | name | subagent_type | Core prompt rules |
 |------|---------------|-------------------|
@@ -168,17 +167,16 @@ Launch all 8 in a single parallel tool call.
 | `fe-developer` | `fe-developer` | Claim tasks assigned by fe-team-leader; implement; self-test; write component docs; report to fe-team-leader via SendMessage; contact be-developer only when necessary |
 | `be-team-leader` | `be-team-leader` | Split BE tasks via TaskCreate; dispatch to be-developer; Code Review all BE code; invoke security-engineer during review; report to project-lead via SendMessage |
 | `be-developer` | `be-developer` | Claim tasks assigned by be-team-leader; implement; self-test; write API docs; report to be-team-leader via SendMessage; contact fe-developer only when necessary |
-| `test-team-leader` | `test-team-leader` | Split test tasks via TaskCreate; dispatch to test-auto and test-manual; review test code; report to project-lead via SendMessage |
-| `test-auto` | `test-engineer-auto` | Claim automated test tasks; write Jest/Cypress tests; target coverage ≥ 80%; report to test-team-leader via SendMessage |
-| `test-manual` | `test-engineer-manual` | Claim manual test tasks; execute test cases; write defect reports; report to test-team-leader via SendMessage |
+| `test-team-leader` | `test-team-leader` | Plan test coverage; dispatch test-case implementation to test-engineer; review test results; report to project-lead via SendMessage |
+| `test-engineer` | `test-engineer` | Design test cases; write automated unit/integration/E2E tests; target coverage ≥ 80%; report to test-team-leader via SendMessage |
 | `security-engineer` | `security-engineer` | Wait to be invoked by a Team Leader; run OWASP Top 10 audit; report findings back to invoking Team Leader via SendMessage |
 
 ### Step 6 — Ready Signal
 
-Wait for all 8 teammates to send idle/ready. Then output:
+Wait for all 7 teammates to send idle/ready. Then output:
 
 ```
-dev-team 已就绪（9人团队）
+dev-team 已就绪（8人团队）
 
 | 角色              | Pane             | 状态  |
 |-------------------|------------------|-------|
@@ -188,8 +186,7 @@ dev-team 已就绪（9人团队）
 | BE Team Leader    | <paneId>         | ready |
 | BE Developer      | <paneId>         | ready |
 | Test Team Leader  | <paneId>         | ready |
-| Test Auto         | <paneId>         | ready |
-| Test Manual       | <paneId>         | ready |
+| Test Engineer     | <paneId>         | ready |
 | Security Engineer | <paneId>         | ready |
 
 现在可以描述开发任务，我作为 Project Lead 负责拆分和分配。
@@ -229,9 +226,9 @@ User → /project-lead "build user login module"
         │         [optional: be-developer → SendMessage → fe-developer: API ready]
         │
         └── Test Team Leader
-            ├── TaskCreate sub-tasks: unit / integration / manual
-            ├── SendMessage → test-auto, test-manual: task assignments
-            ├── Test Auto: coverage ≥ 80%; Test Manual: edge cases + UX
+            ├── TaskCreate sub-tasks: unit / integration / E2E / security-input cases
+            ├── SendMessage → test-engineer: task assignment
+            ├── Test Engineer: automated test cases, coverage ≥ 80%
             ├── Bug found → SendMessage → test-team-leader → SendMessage → responsible TL
             ├── TL routes fix back to their developer
             ├── Dev fixes → re-trigger tests
@@ -282,17 +279,13 @@ User → /project-lead "build user login module"
 
 ### Test Team Leader
 - Test breakdown must cover: happy path / boundary values / error paths / security scenarios
-- Bug routing: receive from test-auto/test-manual → relay to responsible Team Leader via `SendMessage`
+- Bug routing: receive from test-engineer → relay to responsible Team Leader via `SendMessage`
 - Summary report: coverage percentage + uncovered modules + bug list (fixed/unfixed)
 
-### Test Engineer (Automated)
+### Test Engineer
 - Tech stack: Jest / Mocha / Jasmine / Cypress / Playwright / Puppeteer / Selenium
+- Designs test cases before implementation
 - Coverage target: ≥ 80%; explicitly report uncovered modules
-- Report to Test Team Leader only
-
-### Test Engineer (Manual)
-- Focus: edge cases, UX flows, scenarios hard to automate
-- Defect report format: `Issue / Steps to reproduce / Expected / Actual / Severity`
 - Report to Test Team Leader only
 
 ### Security Engineer
@@ -319,7 +312,7 @@ User → /project-lead "build user login module"
 {
   "name": "team-agents",
   "version": "1.0.0",
-  "description": "DAMO Academy-level 9-agent full-stack development team",
+  "description": "DAMO Academy-level 8-agent full-stack development team",
   "skills": [
     "skills/dev-team.md",
     "skills/project-lead.md",
@@ -328,8 +321,7 @@ User → /project-lead "build user login module"
     "skills/be-team-leader.md",
     "skills/be-developer.md",
     "skills/test-team-leader.md",
-    "skills/test-engineer-auto.md",
-    "skills/test-engineer-manual.md",
+    "skills/test-engineer.md",
     "skills/security-engineer.md"
   ]
 }

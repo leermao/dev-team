@@ -1,14 +1,14 @@
 #!/bin/bash
 # TeammateIdle hook: track dev-team initialization readiness.
 # Fires every time a teammate goes idle. Records the teammate as ready
-# in a state file. When all 8 canonical teammates are ready, writes
-# ready_count=8 so dev-team Step 6 can detect completion immediately
+# in a state file. When all 7 canonical teammates are ready, writes
+# ready_count=7 so dev-team Step 6 can detect completion immediately
 # instead of waiting a fixed 30 seconds.
 #
 # Input: JSON via stdin  { teammate_name, team_name, ... }
 # State file: ~/.claude/teams/dev-team/ready.json
 
-CANONICAL_MEMBERS='["fe-team-leader","fe-developer","be-team-leader","be-developer","test-team-leader","test-auto","test-manual","security-engineer"]'
+CANONICAL_MEMBERS='["fe-team-leader","fe-developer","be-team-leader","be-developer","test-team-leader","test-engineer","security-engineer"]'
 STATE_FILE="$HOME/.claude/teams/dev-team/ready.json"
 
 INPUT=$(cat)

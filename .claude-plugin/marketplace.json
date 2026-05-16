@@ -1,0 +1,20 @@
+{
+  "name": "team-agents-local",
+  "owner": {
+    "name": "leermao"
+  },
+  "metadata": {
+    "description": "Local marketplace for the team-agents plugin",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "team-agents",
+      "description": "tmux-visible AI development teams: an 8-agent full-stack team and a compact TDD loop",
+      "version": "1.0.0",
+      "source": "./",
+      "category": "development",
+      "tags": ["tmux", "agents", "tdd", "team"]
+    }
+  ]
+}
